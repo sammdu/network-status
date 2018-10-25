@@ -1,0 +1,11 @@
+# Enter a list of hosts you want to ping. Each line should
+# only contain ONE hostname. 
+
+sammdu.com
+google.com
+cloudflare.com
+linsly.org
+1.1.1.1
+1.0.0.1
+8.8.8.8
+8.8.4.4
