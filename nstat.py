@@ -4,16 +4,22 @@ from os       import popen
 from datetime import datetime
 from time     import sleep
 
+
+# [CONFIGURATION]
+
+pauseperiod = 10  # How long to pause between tests
+
+log_verbose = 'logs/verbose.csv'  # Where a detailed log of ping results are stored
+log_events  = 'logs/events.csv'   # Where logs of significant events are stored
+hosts_path  = 'hosts.txt'         # Where a list of hosts to be pinged are stored
+
+
+# Initialize Global Variables
+
 ups   = 0
 downs = 0
 
 event = '  UP'
-
-
-# [CONFIGURATION]
-
-log_path   = 'stats.csv'
-hosts_path = 'hosts.txt'
 
 
 # [FUNCTIONS]
@@ -28,10 +34,10 @@ def readlistfile(filename):
 
     for line in open(filename, mode='r', encoding='utf-8', newline=''):
         
-        li = line.strip() # Strip the list items of the '/n' character
+        li = line.strip()  # Strip the list items of the '/n' character
         
         # Append the line to the list if it doesn't start with the '#' character and if
-        #     it is not empty
+        #   it is not empty
         if (not li.startswith("#")) and (not li == ''):
             listread.append(li)
     
@@ -55,69 +61,114 @@ def ping(host):
 
 def countstats(data):
     """
+    Counts the number of '  UP's and 'DOWN''s received as 'data'
+    Needs global variables 'ups' and 'downs' to function properly.
     """
     
+    # Access the 'ups' and 'downs' global variables
     global ups
     global downs
     
+    # If the input says '  UP', add '1' to the 'ups' counter
     if   data[0] == '  UP':
         ups   = ups   + 1
     
+    # If the input says 'DOWN', add '1' to the 'downs' counter
     elif data[0] == 'DOWN':
         downs = downs + 1
-
-def assess():
-    """
-    """
     
-    global event
-    
-    if  downs == len(hosts):
-        event = 'DOWN'
-            
-    elif downs < len(hosts):
-        event = '  UP'
-            
+    # If I receive data that's not been planned for, curse at me
     else:
         print('YOU DUMBASS!!!')
 
-def logstat(hostlist, logpath):
+def assess():
     """
-    Logs the 'ping()' result of the given hosts in the 'hostlist' input into the 'logfile'
-    defined in the 'logpath' input.
+    Assess whether the network is down.
+    Requires global variables 'hosts', 'ups', 'downs', and 'event' to function properly.
+    As long as some hosts can be reached, keep the 'event' variable as '  UP', otherwise
+    make it 'DOWN'.
+    """
+    
+    # Access global variable 'event'
+    global event
+    
+    # If the times the host is down EQUALS the number of hosts in total (aka when every
+    #   host is down), make the 'event' variable 'DOWN'
+    if  downs == len(hosts):
+        event = 'DOWN'
+    
+    # As long as some hosts are up, keep the 'event' variable as '  UP'; or overwrite the
+    #   'event' variable when the network is restored
+    elif downs < len(hosts):
+        event = '  UP'
+    
+    # If I receive data that's not been planned for, curse at me
+    else:
+        print('YOU DUMBASS!!!')
+
+def main(hostlist, vlog, elog, pause):
+    """
+    Logs the 'ping()' result of the given hosts in the 'hostlist' input into the log file
+    defined in the 'vlog' input.
+    Also calls the 'countstats()' and 'assess()' functions to evaluate whether the network
+    is down.
     """
     
     # Open the main log file as 'logs', close file automatically as the operation finishes
-    with open(logpath, mode='a', encoding='utf-8', newline='') as logs:
-        
-        # Initialize csv logger to log into 'logs'
-        logger = csv.writer(logs, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    with open(vlog, mode='a', encoding='utf-8', newline='') as vlogs:
+        # Initialize csv logger to log ping results into 'vlogs'
+        vlogger = csv.writer(vlogs, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-        # For each item in the 'host_list', ping the host, print its status, then log the
-        #     status along with the host name in the main log
-        while True:
+        with open(elog, mode='a', encoding='utf-8', newline='') as elogs:
+            # Initialize csv logger to log major events into 'elogs'
+            elogger = csv.writer(elogs, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+            while True:
             
-            global ups
-            global downs
-            global event
+                # Access global variables 'ups', 'downs', and 'event'
+                global ups
+                global downs
+                global event
+            
+                # Make sure the 'ups' and 'downs' variables are reset every time this loop is
+                #   run.
+                ups   = 0
+                downs = 0
+            
+                # For each item in the 'hostlist', ping the host, then log the status along 
+                #   with the host name and current time in the main log;
+                #   everytime a host is pinged add the results to the 'ups' and 'downs'
+                #   counters, using the 'countstats()' function
+                for host in hostlist:
+
+                    timestamp = '{0:%a %Y-%m-%d %H:%M:%S}'.format(datetime.now())
+                    statr = ping(host)
+                    entry = [statr,timestamp,host]
+
+                    vlogger.writerow(entry)
+
+                    countstats(entry)
                 
-            ups   = 0
-            downs = 0
-            
-            for host in hostlist:
+                # Evaluate whether the network is down using the 'assess()' function
+                assess()
+                
+                # Writes major events to the events log
                 timestamp = '{0:%a %Y-%m-%d %H:%M:%S}'.format(datetime.now())
-                statr = ping(host)
-                entry = [statr,timestamp,host]
+                entry = [event,ups,downs,timestamp]
+                elogger.writerow(entry)
                 
-                #print('{}  {}  {}'.format(statr,timestamp,host))
-                logger.writerow(entry)
+                # Print out the newtork status (whether is up or down) as well as the number
+                #   of hosts that are up or down during that specific iteration of pinging
+                print( '{} | Ups: {}; Downs: {}.'.format(event,ups,downs,timestamp) )
                 
-                countstats(entry)
-            
-            print('Ups: {}; Downs: {}.'.format(ups,downs))
-            assess()
-            print(event)
-            sleep(30)
+                # Make sure every time the 'hostlist' is run through, the logs get written
+                #   to the files from memory, so it doesn't get lost when an accident
+                #   happens
+                vlogs.flush()
+                elogs.flush()
+                
+                # Wait 30 seconds before the 'hostlist' is run through again
+                sleep(pause)
 
 
 # [MAIN LOGIC]
@@ -133,7 +184,8 @@ print(str(hosts))
 print()
 print()
 
-# Start logging the ping status of 'hosts' into 'log_path'
-logstat(hosts, log_path)
+# Start logging the ping status of 'hosts' into 'log_path', and pause 'pauseperiod'
+#   seconds between each time a test is run
+main(hosts, log_verbose, log_events, pauseperiod)
 
 print()
