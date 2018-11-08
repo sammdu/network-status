@@ -9,7 +9,7 @@ from time     import sleep
 
 # [CONFIGURATION]
 
-pauseperiod = 10  # How long to pause between tests
+pauseperiod = 30  # How long to pause between tests
 
 log_verbose = 'logs/verbose.csv'  # Where a detailed log of ping results are stored
 log_events  = 'logs/events.csv'   # Where logs of significant events are stored

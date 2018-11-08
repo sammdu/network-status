@@ -2,3 +2,4 @@
 logs/events.csv
 logs/verbose.csv
 .mypy_cache/
+INPORTANT_NOTES.txt
