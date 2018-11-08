@@ -1,3 +1,4 @@
 
 logs/events.csv
 logs/verbose.csv
+.mypy_cache/
