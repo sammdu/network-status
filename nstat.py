@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import csv
 
 from os       import popen
@@ -169,7 +171,7 @@ def main(hostlist, elog, pause):
             #   supply the verbose log file
             assess(log_verbose)
                 
-            # Writes major events to the events log
+            # Writes generic events to the events log
             timestamp = '{0:%a %Y-%m-%d %H:%M:%S}'.format(datetime.now())
             event_entry = [event,ups,downs,timestamp]
             elogger.writerow(event_entry)
