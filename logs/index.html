@@ -40,7 +40,7 @@ function writeEventLog(url) {
     xhr.open('GET', url);
     xhr.send();
 }
-writeEventLog('../logs/events.csv');
+writeEventLog('http://probe.network.linsly.org/events.csv');
 
 // Write Verbose Logs
 function writeVerboseLog(url) {
@@ -51,7 +51,7 @@ function writeVerboseLog(url) {
     xhr.open('GET', url);
     xhr.send();
 }
-writeVerboseLog('../logs/verbose.csv');
+writeVerboseLog('http://probe.network.linsly.org/verbose.csv');
 
 </script>
 
