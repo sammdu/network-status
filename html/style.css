@@ -1,0 +1,80 @@
+body {
+	background-color: #222427;
+	color: #fff;
+
+	font-family: 'Ubuntu','Cantarell','Roboto',sans-serif;
+}
+
+.title {
+	margin: 1.5em auto 0.5em auto;
+	text-align: center;
+
+	font-weight: lighter;
+	font-size: 2.4em;
+}
+
+h2 {
+	font-size: 1.4em;
+	font-family: 'Ubuntu Mono','Droid Sans Mono','Courier New','Ubuntu','Cantarell','Roboto',monospace;
+	font-weight: 600;
+
+	padding: 0 0 0 0.5em;
+}
+
+/* MOBILE VIEW */
+textarea {
+	font-size: 1.2em;
+
+	width: 80vw;
+	height: 70vh;
+
+	background-color: #222222;
+	color: #fff;
+
+	resize: none;
+	
+	border-width: 0;
+	border-radius: 0 0 0.3em 0.3em;
+	border-color: #fff;
+
+	padding: 0 0.5em 0.5em 0.5em;
+	margin: 0 0 -2px 0;
+}
+
+/* LARGESCREEN VIEW */
+@media only screen and (min-width: 935px) {
+	textarea {
+		font-size: 1.4em;
+		width: 35vw;
+	}
+}
+
+/* MOBILE VIEW */
+.container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+/* LARGESCREEN VIEW */
+@media only screen and (min-width: 935px) {
+	.container {
+		flex-direction: row;
+		justify-content: center;
+	}
+}
+
+.logdisplay {
+	margin: 2em;
+	border-radius: 0.3em;
+	box-shadow: 0 3rem 3rem -1rem hsla(0, 0%, 3%, 0.5);
+}
+
+.elog {
+	background-color: #653ee3;
+}
+
+.vlog {
+	background-color: #34b66c;
+}

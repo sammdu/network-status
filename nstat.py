@@ -2,14 +2,14 @@
 
 import csv
 
-from os       import popen
+from os       import popen, path, mkdir, makedirs
 from datetime import datetime
 from time     import sleep
 
 
 # [CONFIGURATION]
 
-pauseperiod = 30  # How long to pause between tests
+pauseperiod = 60  # How long to pause between tests
 
 log_verbose = 'logs/verbose.csv'  # Where a detailed log of ping results are stored
 log_events  = 'logs/events.csv'   # Where logs of significant events are stored
@@ -21,7 +21,9 @@ hosts_path  = 'hosts.txt'         # Where a list of hosts to be pinged are store
 ups   = 0
 downs = 0
 
-event = '  UP'
+refstate = ''
+
+reporttime = ['00','08','15','17','19']
 
 verbose_entry = []
 
@@ -128,7 +130,7 @@ def assess(vlog):
     elif downs < len(hosts):
         event = '  UP'
         # Log verbosely when a majority of hosts are down
-        if downs > len(hosts)/2+1:
+        if downs > len(hosts)/2-1:
             with open(vlog, mode='a', encoding='utf-8', newline='') as vlogs:
                 # Initialize csv logger to log ping results into 'vlogs'
                 vlogger = csv.writer(vlogs, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -154,10 +156,12 @@ def main(hostlist, elog, pause):
 
         while True:
         
-            # Access global variables 'ups', 'downs', 'event', and 'verbose_entry'
+            # Access global variables
             global ups
             global downs
             global event
+            global refstate
+            global reporttime
             
             # Make sure the 'ups' and 'downs' variables are reset every time this loop is
             #   run.
@@ -166,15 +170,20 @@ def main(hostlist, elog, pause):
             
             # Test the network and create a verbose entry
             network_test(hostlist)
+            # Create a timestamp upon each test
+            timestamp = '{0:%a %Y-%m-%d %H:%M:%S}'.format(datetime.now())
             
             # Evaluate whether the network is down using the 'assess()' function,
-            #   supply the verbose log file
+            #   supply the verbose log file in order to log conditionally
             assess(log_verbose)
                 
-            # Writes generic events to the events log
-            timestamp = '{0:%a %Y-%m-%d %H:%M:%S}'.format(datetime.now())
+            # Writes generic events to the events log if it differed from the previous
+            #   state OR if any time set for reporting is reached
             event_entry = [event,ups,downs,timestamp]
-            elogger.writerow(event_entry)
+            
+            if (timestamp[15:17] in reporttime) or (event != refstate):
+                elogger.writerow(event_entry)
+                refstate = event
             
             # Print out the newtork status (whether is up or down) as well as the number
             #   of hosts that are up or down during that specific iteration of pinging
@@ -190,6 +199,12 @@ def main(hostlist, elog, pause):
 
 
 # [MAIN LOGIC]
+
+if not path.isdir("./logs/"):
+    makedirs("./logs")
+    print()
+    print("* CREATED DIRECTORY 'logs'. *")
+    print()
 
 # Read 'hosts.txt' into the list 'hosts'
 hosts = readlistfile(hosts_path)
