@@ -1,0 +1,14 @@
+[Unit]
+Description=Network Status Monitor Tool by Samm Du
+After=network.target
+
+[Service]
+Type=forking
+Restart=always
+RestartSec=2
+StartLimitIntervalSec=0
+User=pi
+ExecStart=/home/pi/init.sh
+
+[Install]
+WantedBy=multi-user.target
