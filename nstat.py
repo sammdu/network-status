@@ -23,7 +23,7 @@ downs = 0
 
 refstate = ''
 
-reporttime = ['00','08','15','17','19']
+reporttime = ['00:00','08:00','15:00','17:30','19:00']
 
 verbose_entry = []
 
@@ -181,7 +181,7 @@ def main(hostlist, elog, pause):
             #   state OR if any time set for reporting is reached
             event_entry = [event,ups,downs,timestamp]
             
-            if (timestamp[15:17] in reporttime) or (event != refstate):
+            if (timestamp[15:20] in reporttime) or (event != refstate):
                 elogger.writerow(event_entry)
                 refstate = event
             
