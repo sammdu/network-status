@@ -2,7 +2,7 @@
 
 import csv
 
-from os       import popen, path, mkdir, makedirs
+from os       import popen
 from datetime import datetime
 from time     import sleep
 
@@ -199,12 +199,6 @@ def main(hostlist, elog, pause):
 
 
 # [MAIN LOGIC]
-
-if not path.isdir("./logs/"):
-    makedirs("./logs")
-    print()
-    print("* CREATED DIRECTORY 'logs'. *")
-    print()
 
 # Read 'hosts.txt' into the list 'hosts'
 hosts = readlistfile(hosts_path)
