@@ -38,6 +38,7 @@ function writeEventLog(url) {
         document.getElementById('eventlog').textContent = this.responseText;
     };
     xhr.open('GET', url);
+    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
     xhr.send();
 }
 writeEventLog('http://probe.network.linsly.org/events.csv');
@@ -49,6 +50,7 @@ function writeVerboseLog(url) {
         document.getElementById('verboselog').textContent = this.responseText;
     };
     xhr.open('GET', url);
+    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
     xhr.send();
 }
 writeVerboseLog('http://probe.network.linsly.org/verbose.csv');
